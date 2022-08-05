@@ -76,7 +76,7 @@ with mp_hands.Hands(min_detection_confidence=0.9, min_tracking_confidence=0.9) a
                  try:
                     indexfingermcp_x=int(normalizedLandmark.x*monitorDimensions[0])
                     indexfingermcp_y=int(normalizedLandmark.y*monitorDimensions[1])
-                    new_pos = [int(indexfingertip_x*cursor_speed),int(indexfingertip_y*cursor_speed)]
+                    new_pos = [int(indexfingermcp_x*cursor_speed),int(indexfingermcp_y*cursor_speed)]
                     if abs(new_pos[0]-prev_pos[0])>min_movement[0] and abs(new_pos[1]-prev_pos[1])>min_movement[1]:
                         mouse.move(new_pos[0],new_pos[1])
                         prev_pos = new_pos
