@@ -15,7 +15,7 @@ clicks_l = 0
 clicks_r = 0
 min_movement = [3,0]
 prev_pos = [0,0]
-reqdPoints = ['HandLandmark.INDEX_FINGER_TIP','HandLandmark.INDEX_FINGER_MCP','HandLandmark.MIDDLE_FINGER_TIP','HandLandmark.THUMB_TIP']
+reqdPoints = ['HandLandmark.INDEX_FINGER_TIP','HandLandmark.MIDDLE_FINGER_TIP','HandLandmark.THUMB_TIP']
 monitorDimensions = [win32api.GetSystemMetrics(0),win32api.GetSystemMetrics(1)]
 print(monitorDimensions)
  
@@ -57,8 +57,14 @@ with mp_hands.Hands(min_detection_confidence=0.9, min_tracking_confidence=0.9) a
  
                 if point=='HandLandmark.INDEX_FINGER_TIP':
                  try:
+                    #indexfingertip_x=pixelCoordinatesLandmark[0]
                     indexfingertip_x=int(normalizedLandmark.x*monitorDimensions[0])
+                    #indexfingertip_y=pixelCoordinatesLandmark[1]
                     indexfingertip_y=int(normalizedLandmark.y*monitorDimensions[1])
+                    new_pos = [int(indexfingertip_x*cursor_speed),int(indexfingertip_y*cursor_speed)]
+                    if abs(new_pos[0]-prev_pos[0])>min_movement[0] and abs(new_pos[1]-prev_pos[1])>min_movement[1]:
+                        win32api.SetCursorPos(new_pos)
+                        prev_pos = new_pos
  
                  except Exception as e:
                     print(e)
@@ -68,17 +74,6 @@ with mp_hands.Hands(min_detection_confidence=0.9, min_tracking_confidence=0.9) a
                     middlefingertip_x=int(normalizedLandmark.x*monitorDimensions[0])
                     middlefingertip_y=int(normalizedLandmark.y*monitorDimensions[1])
  
-                 except Exception as e:
-                    print(e)
-
-                if point=='HandLandmark.INDEX_FINGER_MCP':
-                 try:
-                    indexfingermcp_x=int(normalizedLandmark.x*monitorDimensions[0])
-                    indexfingermcp_y=int(normalizedLandmark.y*monitorDimensions[1])
-                    new_pos = [int(indexfingertip_x*cursor_speed),int(indexfingertip_y*cursor_speed)]
-                    if abs(new_pos[0]-prev_pos[0])>min_movement[0] and abs(new_pos[1]-prev_pos[1])>min_movement[1]:
-                        mouse.move(new_pos[0],new_pos[1])
-                        prev_pos = new_pos
                  except Exception as e:
                     print(e)
  
