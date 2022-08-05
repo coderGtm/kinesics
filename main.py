@@ -1,5 +1,4 @@
 from tkinter import *
-from tkinter import dialog
 from PIL import Image, ImageTk
 from tkinter import filedialog
 
@@ -9,8 +8,8 @@ root = Tk()
 
 root.state("zoomed")
 
-root.title("Team : PYRAMID")
-root.iconbitmap("gesture.jpg")
+root.title("KINESICS")
+# root.iconbitmap("vsCode.ico")
 
 
 # defining all METHODS
@@ -22,7 +21,7 @@ def open_image():
     global gesture_image
     global gesture_label
 
-    filename = filedialog.askopenfilename(initialdir="vsCode.ico",
+    filename = filedialog.askopenfilename(initialdir="",
                                           title="Select a File :", filetypes=(("jpg files", "*.jpg"), ("all files", "*.*")))
     gesture_photo = Image.open(filename)
     # tuple of width, height
