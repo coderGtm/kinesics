@@ -12,10 +12,11 @@ import mouse
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
 cursor_speed = 1.5
-clicks = 0
+clicks_l = 0
+clicks_r = 0
 min_movement = [3,0]
 prev_pos = [0,0]
-reqdPoints = ['HandLandmark.INDEX_FINGER_TIP','HandLandmark.THUMB_TIP']
+reqdPoints = ['HandLandmark.INDEX_FINGER_TIP','HandLandmark.MIDDLE_FINGER_TIP','HandLandmark.THUMB_TIP']
 monitorDimensions = [win32api.GetSystemMetrics(0),win32api.GetSystemMetrics(1)]
 print(monitorDimensions)
  
@@ -94,8 +95,8 @@ with mp_hands.Hands(min_detection_confidence=0.9, min_tracking_confidence=0.9) a
                     if abs(Distance_x)<20:
                         #print(Distance_y)
                         if abs(Distance_y)<50:
-                            clicks+=1
-                            if clicks%3 == 0:
+                            clicks_l+=1
+                            if clicks_l%3 == 0:
                                 mouse.click()                            
                 except:
                     pass
@@ -108,8 +109,8 @@ with mp_hands.Hands(min_detection_confidence=0.9, min_tracking_confidence=0.9) a
                     if abs(Distance_x)<20:
                         #print(Distance_y)
                         if abs(Distance_y)<50:
-                            clicks+=1
-                            if clicks%3 == 0:
+                            clicks_r+=1
+                            if clicks_r%3 == 0:
                                 mouse.right_click()                            
                 except:
                     pass
