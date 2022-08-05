@@ -5,7 +5,6 @@ from mediapipe.framework.formats import landmark_pb2
 import time
 from math import sqrt
 import win32api
-import pyautogui
 import mouse
  
  
@@ -14,9 +13,9 @@ mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
 cursor_speed = 1.5
 clicks = 0
-min_movement = [1,1]
+min_movement = [3,0]
 prev_pos = [0,0]
-reqdPoints = ['HandLandmark.INDEX_FINGER_MCP','HandLandmark.INDEX_FINGER_TIP']
+reqdPoints = ['HandLandmark.INDEX_FINGER_TIP','HandLandmark.THUMB_TIP']
 monitorDimensions = [win32api.GetSystemMetrics(0),win32api.GetSystemMetrics(1)]
 print(monitorDimensions)
  
@@ -56,42 +55,64 @@ with mp_hands.Hands(min_detection_confidence=0.9, min_tracking_confidence=0.9) a
     
                 point=str(point)
  
-                if point=='HandLandmark.INDEX_FINGER_MCP':
-                 try:
-                    #indexfingermcp_x=pixelCoordinatesLandmark[0]
-                    indexfingermcp_x=int(normalizedLandmark.x*monitorDimensions[0])
-                    #indexfingermcp_y=pixelCoordinatesLandmark[1]
-                    indexfingermcp_y=int(normalizedLandmark.y*monitorDimensions[1])
-                    mouse.move(int(indexfingermcp_x*cursor_speed),int(indexfingermcp_y*cursor_speed))
- 
-                 except Exception as e:
-                    print(e)
- 
                 if point=='HandLandmark.INDEX_FINGER_TIP':
                  try:
+                    #indexfingertip_x=pixelCoordinatesLandmark[0]
                     indexfingertip_x=int(normalizedLandmark.x*monitorDimensions[0])
+                    #indexfingertip_y=pixelCoordinatesLandmark[1]
                     indexfingertip_y=int(normalizedLandmark.y*monitorDimensions[1])
-                    print(indexfingermcp_y-indexfingertip_y)
-                    if abs(indexfingermcp_y - indexfingertip_y)<=10:
-                        clicks+=1
-                        if clicks%1 == 0:
-                            mouse.click()   
+                    new_pos = [int(indexfingertip_x*cursor_speed),int(indexfingertip_y*cursor_speed)]
+                    if abs(new_pos[0]-prev_pos[0])>min_movement[0] and abs(new_pos[1]-prev_pos[1])>min_movement[1]:
+                        win32api.SetCursorPos(new_pos)
+                        prev_pos = new_pos
  
                  except Exception as e:
                     print(e)
-                    
-                if point=='HandLandmark.INDEX_FINGER_TIP':
+
+                if point=='HandLandmark.MIDDLE_FINGER_TIP':
                  try:
-                    indexfingertip_x=int(normalizedLandmark.x*monitorDimensions[0])
-                    indexfingertip_y=int(normalizedLandmark.y*monitorDimensions[1])
-                    print(indexfingermcp_y-indexfingertip_y)
-                    if abs(indexfingermcp_y - indexfingertip_y)<=10:
-                        clicks+=1
-                        if clicks%1 == 0:
-                            mouse.click()   
+                    middlefingertip_x=int(normalizedLandmark.x*monitorDimensions[0])
+                    middlefingertip_y=int(normalizedLandmark.y*monitorDimensions[1])
  
                  except Exception as e:
                     print(e)
+ 
+                if point=='HandLandmark.THUMB_TIP':
+                 try:
+                    thumbfingertip_x=int(normalizedLandmark.x*monitorDimensions[0])
+                    thumbfingertip_y=int(normalizedLandmark.y*monitorDimensions[1])
+                    #print("thumb",thumbfingertip_x)
+ 
+                 except:
+                    pass
+ 
+                #left click
+                try:
+                    Distance_x = indexfingertip_x-thumbfingertip_x
+                    Distance_y = indexfingertip_y-thumbfingertip_y
+                    #print(indexfingertip_x-thumbfingertip_x,indexfingertip_y-thumbfingertip_y)
+                    if abs(Distance_x)<20:
+                        #print(Distance_y)
+                        if abs(Distance_y)<50:
+                            clicks+=1
+                            if clicks%3 == 0:
+                                mouse.click()                            
+                except:
+                    pass
+                #right click
+                try:
+                    Distance_x = middlefingertip_x-thumbfingertip_x
+                    Distance_y = middlefingertip_y-thumbfingertip_y
+                    print(Distance_x,Distance_y)
+                    #print(indexfingertip_x-thumbfingertip_x,indexfingertip_y-thumbfingertip_y)
+                    if abs(Distance_x)<20:
+                        #print(Distance_y)
+                        if abs(Distance_y)<50:
+                            clicks+=1
+                            if clicks%3 == 0:
+                                mouse.right_click()                            
+                except:
+                    pass
  
         cv2.imshow('Hand Tracking', image)
  
