@@ -17,7 +17,7 @@ clicks_r = 0
 min_movement = [3,0]
 prev_pos = [0,0]
 reqdPoints = ['HandLandmark.INDEX_FINGER_TIP','HandLandmark.INDEX_FINGER_MCP','HandLandmark.MIDDLE_FINGER_TIP','HandLandmark.THUMB_TIP']
-monitorDimensions = [win32api.GetSystemMetrics(0),win32api.GetSystemMetrics(1)]
+monitorDimensions = [win32api.GetSystemMetrics(0)*1.25,win32api.GetSystemMetrics(1)*1.25]
 print(monitorDimensions)
  
 video = cv2.VideoCapture(0)
