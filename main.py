@@ -17,29 +17,6 @@ def myfunc():
     pass
 
 
-def open_image():
-    global gesture_image
-    global gesture_label
-
-    filename = filedialog.askopenfilename(initialdir="",
-                                          title="Select a File :", filetypes=(("jpg files", "*.jpg"), ("all files", "*.*")))
-    gesture_photo = Image.open(filename)
-    # tuple of width, height
-    resized_gesture_photo = gesture_photo.resize((500, 500))
-    gesture_image = ImageTk.PhotoImage(resized_gesture_photo)
-    gesture_label = Label(open_frame, image=gesture_image)
-    gesture_label.pack(pady="50")
-
-
-def delete_img():
-    gesture_label.pack_forget()
-
-
-def modify_img():
-    delete_img()
-    open_image()
-
-
 # creating MENU BAR
 mainMenu = Menu(root, tearoff=0)
 
@@ -103,44 +80,15 @@ mainMenu.add_cascade(label="Help", menu=help_menu)
 root.config(menu=mainMenu)
 
 
-# PREVIEW FRAME
-
-# TODO: resizer of the image dynamically
-
-
-open_frame = Frame(root)
-
-Button(open_frame, text="Open Image File", command=open_image).pack()
-
-open_frame.pack()
-
 # BUTTONS
 
 
 f1 = Frame(root)
 
-bt1_ADD = Button(f1, text="ADD", font="comicsansms", command=open_image)
-bt1_ADD.pack(side="left", padx="65", pady="20")
-bt2_DELETE = Button(f1, text="DELETE", font="comicsansms", command=delete_img)
-bt2_DELETE.pack(padx="0", pady="20")
+start_btn = Button(f1, text="START", font="comicsansms")
+start_btn.pack(side="left", padx="65", pady="20")
+
 
 f1.pack()
-
-f2 = Frame(root)
-
-bt3_MODIFY = Button(f2, text="MODIFY", font="comicsansms",
-                    command=modify_img)
-bt3_MODIFY.pack(side="left", padx="30", pady="20")
-bt4_EXIT = Button(f2, text="EXIT", font="comicsansms", command=root.quit)
-bt4_EXIT.pack(side="left", padx="35", pady="20")
-
-f2.pack()
-
-
-# STATUS BAR
-# TODO: status Bar showing the connected/disconnected status
-
-# SCROLL BAR
-# TODO: horizontal scroll bar
 
 root.mainloop()
