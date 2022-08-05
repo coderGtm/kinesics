@@ -10,7 +10,7 @@ root = Tk()
 root.state("zoomed")
 
 root.title("Team : PYRAMID")
-root.iconbitmap("C:/Users/KRISH-PC/OneDrive/college/PYTHKON2022/vsCode.ico")
+root.iconbitmap("gesture.jpg")
 
 
 # defining all METHODS
@@ -22,7 +22,7 @@ def open_image():
     global gesture_image
     global gesture_label
 
-    filename = filedialog.askopenfilename(initialdir="C:/Users/KRISH-PC/OneDrive/college/PYTHKON2022",
+    filename = filedialog.askopenfilename(initialdir="vsCode.ico",
                                           title="Select a File :", filetypes=(("jpg files", "*.jpg"), ("all files", "*.*")))
     gesture_photo = Image.open(filename)
     # tuple of width, height
