@@ -6,7 +6,8 @@ import time
 from math import sqrt
 import win32api
 import mouse
- 
+import win32gui, win32con
+import ctypes
  
  
 mp_drawing = mp.solutions.drawing_utils
@@ -16,7 +17,9 @@ clicks_l = 0
 clicks_r = 0
 min_movement = [3,0]
 prev_pos = [0,0]
-reqdPoints = ['HandLandmark.INDEX_FINGER_TIP','HandLandmark.INDEX_FINGER_MCP','HandLandmark.MIDDLE_FINGER_TIP','HandLandmark.THUMB_TIP']
+ring_prev_pos = [0,0]
+last_minimized = 0
+reqdPoints = ['HandLandmark.INDEX_FINGER_TIP','HandLandmark.WRIST','HandLandmark.PINKY_TIP','HandLandmark.INDEX_FINGER_MCP','HandLandmark.MIDDLE_FINGER_TIP','HandLandmark.THUMB_TIP','HandLandmark.RING_FINGER_TIP']
 monitorDimensions = [win32api.GetSystemMetrics(0),win32api.GetSystemMetrics(1)]
 print(monitorDimensions)
  
@@ -60,15 +63,13 @@ with mp_hands.Hands(min_detection_confidence=0.9, min_tracking_confidence=0.9) a
                  try:
                     indexfingertip_x=int(normalizedLandmark.x*monitorDimensions[0])
                     indexfingertip_y=int(normalizedLandmark.y*monitorDimensions[1])
- 
                  except Exception as e:
                     print(e)
 
                 if point=='HandLandmark.MIDDLE_FINGER_TIP':
                  try:
                     middlefingertip_x=int(normalizedLandmark.x*monitorDimensions[0])
-                    middlefingertip_y=int(normalizedLandmark.y*monitorDimensions[1])
- 
+                    middlefingertip_y=int(normalizedLandmark.y*monitorDimensions[1]) 
                  except Exception as e:
                     print(e)
 
@@ -76,9 +77,9 @@ with mp_hands.Hands(min_detection_confidence=0.9, min_tracking_confidence=0.9) a
                  try:
                     indexfingermcp_x=int(normalizedLandmark.x*monitorDimensions[0])
                     indexfingermcp_y=int(normalizedLandmark.y*monitorDimensions[1])
-                    new_pos = [int(indexfingermcp_x*cursor_speed),int(indexfingermcp_y*cursor_speed)]
+                    new_pos = [int(indexfingertip_x*cursor_speed),int(indexfingertip_y*cursor_speed)]
                     if abs(new_pos[0]-prev_pos[0])>min_movement[0] and abs(new_pos[1]-prev_pos[1])>min_movement[1]:
-                        mouse.move(new_pos[0],new_pos[1])
+                        win32api.SetCursorPos(new_pos)
                         prev_pos = new_pos
                  except Exception as e:
                     print(e)
@@ -88,9 +89,27 @@ with mp_hands.Hands(min_detection_confidence=0.9, min_tracking_confidence=0.9) a
                     thumbfingertip_x=int(normalizedLandmark.x*monitorDimensions[0])
                     thumbfingertip_y=int(normalizedLandmark.y*monitorDimensions[1])
                     #print("thumb",thumbfingertip_x)
- 
                  except:
                     pass
+                if point=='HandLandmark.RING_FINGER_TIP':
+                 try:
+                    ringfingertip_x=int(normalizedLandmark.x*monitorDimensions[0])
+                    ringfingertip_y=int(normalizedLandmark.y*monitorDimensions[1])                      
+                 except:
+                    pass
+                if point=='HandLandmark.PINKY_TIP':
+                 try:
+                    pinkytip_x=int(normalizedLandmark.x*monitorDimensions[0])
+                    pinkytip_y=int(normalizedLandmark.y*monitorDimensions[1])                      
+                 except:
+                    pass
+                if point=='HandLandmark.WRIST':
+                 try:
+                    wrist_x=int(normalizedLandmark.x*monitorDimensions[0])
+                    wrist_y=int(normalizedLandmark.y*monitorDimensions[1])                      
+                 except:
+                    pass
+                
  
                 #left click
                 try:
@@ -119,6 +138,26 @@ with mp_hands.Hands(min_detection_confidence=0.9, min_tracking_confidence=0.9) a
                                 mouse.right_click()                            
                 except:
                     pass
+
+                #minimize
+                if time.time() - last_minimized > 1:
+                    try:
+                        if abs(ringfingertip_y - indexfingertip_y)<=50 and abs(indexfingertip_y - thumbfingertip_y)<=50:
+                            fgwnd = win32gui.GetForegroundWindow()
+                            #win32gui.ShowWindow(fgwnd, win32con.SW_MINIMIZE)
+                            last_minimized = time.time()
+                    except Exception as e:
+                        print(e)
+
+                #lock
+                try:
+                    pinkyWristDist = sqrt((pinkytip_x-wrist_x)**2 + (pinkytip_y-wrist_y)**2)
+                    thumbWristDist = sqrt((thumbfingertip_x-wrist_x)**2 + (thumbfingertip_y-wrist_y)**2)
+                    print(pinkyWristDist,thumbWristDist)
+                    if (pinkyWristDist<=150 and thumbWristDist<=150):
+                        ctypes.windll.user32.LockWorkStation()
+                except Exception as e:
+                    print(e)
  
         cv2.imshow('Hand Tracking', image)
  
