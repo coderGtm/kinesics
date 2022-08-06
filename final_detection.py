@@ -17,7 +17,7 @@ clicks_r = 0
 min_movement = [3,0]
 prev_pos = [0,0]
 reqdPoints = ['HandLandmark.INDEX_FINGER_TIP','HandLandmark.INDEX_FINGER_MCP','HandLandmark.MIDDLE_FINGER_TIP','HandLandmark.THUMB_TIP']
-monitorDimensions = [win32api.GetSystemMetrics(0)*1.25,win32api.GetSystemMetrics(1)*1.25]
+monitorDimensions = [win32api.GetSystemMetrics(0),win32api.GetSystemMetrics(1)]
 print(monitorDimensions)
  
 video = cv2.VideoCapture(0)
@@ -99,7 +99,7 @@ with mp_hands.Hands(min_detection_confidence=0.9, min_tracking_confidence=0.9) a
                     #print(indexfingertip_x-thumbfingertip_x,indexfingertip_y-thumbfingertip_y)
                     if abs(Distance_x)<20:
                         #print(Distance_y)
-                        if abs(Distance_y)<50:
+                        if abs(Distance_y)<30:
                             clicks_l+=1
                             if clicks_l%3 == 0:
                                 mouse.click()                            
@@ -113,7 +113,7 @@ with mp_hands.Hands(min_detection_confidence=0.9, min_tracking_confidence=0.9) a
                     #print(indexfingertip_x-thumbfingertip_x,indexfingertip_y-thumbfingertip_y)
                     if abs(Distance_x)<20:
                         #print(Distance_y)
-                        if abs(Distance_y)<50:
+                        if abs(Distance_y)<30:
                             clicks_r+=1
                             if clicks_r%3 == 0:
                                 mouse.right_click()                            
