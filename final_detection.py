@@ -8,20 +8,23 @@ import win32api
 import mouse
 import win32gui, win32con
 import ctypes
- 
+import pyautogui
+import keyboard
+
  
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
 cursor_speed = 1.5
 clicks_l = 0
 clicks_r = 0
+clicks_dbl = 0
 min_movement = [3,0]
 prev_pos = [0,0]
 ring_prev_pos = [0,0]
 last_minimized = 0
-reqdPoints = ['HandLandmark.INDEX_FINGER_TIP','HandLandmark.WRIST','HandLandmark.PINKY_TIP','HandLandmark.INDEX_FINGER_MCP','HandLandmark.MIDDLE_FINGER_TIP','HandLandmark.THUMB_TIP','HandLandmark.RING_FINGER_TIP']
+reqdPoints = ['HandLandmark.INDEX_FINGER_TIP','HandLandmark.MIDDLE_FINGER_PIP','HandLandmark.MIDDLE_FINGER_DIP','HandLandmark.WRIST','HandLandmark.PINKY_TIP','HandLandmark.INDEX_FINGER_MCP','HandLandmark.MIDDLE_FINGER_TIP','HandLandmark.THUMB_TIP','HandLandmark.RING_FINGER_TIP']
 monitorDimensions = [win32api.GetSystemMetrics(0),win32api.GetSystemMetrics(1)]
-print(monitorDimensions)
+
  
 video = cv2.VideoCapture(0)
  
@@ -63,6 +66,20 @@ with mp_hands.Hands(min_detection_confidence=0.9, min_tracking_confidence=0.9) a
                  try:
                     indexfingertip_x=int(normalizedLandmark.x*monitorDimensions[0])
                     indexfingertip_y=int(normalizedLandmark.y*monitorDimensions[1])
+                 except Exception as e:
+                    print(e)
+
+                if point=='HandLandmark.MIDDLE_FINGER_PIP':
+                 try:
+                    indexfingerpip_x=int(normalizedLandmark.x*monitorDimensions[0])
+                    indexfingerpip_y=int(normalizedLandmark.y*monitorDimensions[1]) 
+                 except Exception as e:
+                    print(e)
+
+                if point=='HandLandmark.MIDDLE_FINGER_DIP':
+                 try:
+                    indexfingerdip_x=int(normalizedLandmark.x*monitorDimensions[0])
+                    indexfingerdip_y=int(normalizedLandmark.y*monitorDimensions[1]) 
                  except Exception as e:
                     print(e)
 
@@ -128,7 +145,6 @@ with mp_hands.Hands(min_detection_confidence=0.9, min_tracking_confidence=0.9) a
                 try:
                     Distance_x = middlefingertip_x-thumbfingertip_x
                     Distance_y = middlefingertip_y-thumbfingertip_y
-                    print(Distance_x,Distance_y)
                     #print(indexfingertip_x-thumbfingertip_x,indexfingertip_y-thumbfingertip_y)
                     if abs(Distance_x)<20:
                         #print(Distance_y)
@@ -139,12 +155,35 @@ with mp_hands.Hands(min_detection_confidence=0.9, min_tracking_confidence=0.9) a
                 except:
                     pass
 
+                #double-click
+                try:
+                    indexMiddleDist = sqrt((indexfingertip_x-middlefingertip_x)**2,(indexfingertip_y-middlefingertip_y)**2)
+                    indexThumbDist = sqrt((indexfingertip_x-thumbfingertip_x)**2,(indexfingertip_y-thumbfingertip_y)**2)
+                    middleThumbDist = sqrt((thumbfingertip_x-middlefingertip_x)**2,(thumbfingertip_y-middlefingertip_y)**2)
+                    if indexMiddleDist<=10 and middleThumbDist<=10 and indexThumbDist<=10:
+                        clicks_dbl+=1
+                        if clicks_dbl%3 == 0:
+                            mouse.double_click()
+                except:
+                    pass
+
+                #ok
+                try:
+                    pinkyWristDist = sqrt((pinkytip_x-wrist_x)**2 + (pinkytip_y-wrist_y)**2)
+                    thumbPinkyDist = sqrt((thumbfingertip_x-pinkytip_x)**2 + (thumbfingertip_y-pinkytip_y)**2)
+                    indexPipDipDist = sqrt((indexfingerpip_x-indexfingerpip_x)**2 + (indexfingerdip_x-indexfingerdip_y)**2)
+                    if (pinkyWristDist<=250 and thumbPinkyDist>=350 and indexPipDipDist>=100):
+                        keyboard.press('enter')
+                        print("Enter")
+                except Exception as e:
+                    print(e)
+
                 #minimize
                 if time.time() - last_minimized > 1:
                     try:
                         if abs(ringfingertip_y - indexfingertip_y)<=50 and abs(indexfingertip_y - thumbfingertip_y)<=50:
                             fgwnd = win32gui.GetForegroundWindow()
-                            #win32gui.ShowWindow(fgwnd, win32con.SW_MINIMIZE)
+                            win32gui.ShowWindow(fgwnd, win32con.SW_MINIMIZE)
                             last_minimized = time.time()
                     except Exception as e:
                         print(e)
@@ -153,9 +192,9 @@ with mp_hands.Hands(min_detection_confidence=0.9, min_tracking_confidence=0.9) a
                 try:
                     pinkyWristDist = sqrt((pinkytip_x-wrist_x)**2 + (pinkytip_y-wrist_y)**2)
                     thumbWristDist = sqrt((thumbfingertip_x-wrist_x)**2 + (thumbfingertip_y-wrist_y)**2)
-                    print(pinkyWristDist,thumbWristDist)
                     if (pinkyWristDist<=150 and thumbWristDist<=150):
                         ctypes.windll.user32.LockWorkStation()
+                        print("locked")
                 except Exception as e:
                     print(e)
  
