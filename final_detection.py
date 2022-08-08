@@ -14,21 +14,21 @@ import keyboard
  
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
-cursor_speed = 1.5
+cursor_speed = 3
 clicks_l = 0
 clicks_r = 0
 clicks_dbl = 0
 min_movement = [3,0]
-prev_pos = [0,0]
-ring_prev_pos = [0,0]
 last_minimized = 0
 reqdPoints = ['HandLandmark.INDEX_FINGER_TIP','HandLandmark.MIDDLE_FINGER_PIP','HandLandmark.MIDDLE_FINGER_DIP','HandLandmark.WRIST','HandLandmark.PINKY_TIP','HandLandmark.INDEX_FINGER_MCP','HandLandmark.MIDDLE_FINGER_TIP','HandLandmark.THUMB_TIP','HandLandmark.RING_FINGER_TIP']
 monitorDimensions = [win32api.GetSystemMetrics(0),win32api.GetSystemMetrics(1)]
+prev_pos = [int(monitorDimensions[0]/2),int(monitorDimensions[1]/2)]
+ring_prev_pos = [0,0]
 
  
 video = cv2.VideoCapture(0)
  
-with mp_hands.Hands(min_detection_confidence=0.9, min_tracking_confidence=0.9) as hands: 
+with mp_hands.Hands(min_detection_confidence=0.9, min_tracking_confidence=0.9, max_num_hands=1) as hands: 
     while video.isOpened():
         _, frame = video.read()
         image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -94,10 +94,6 @@ with mp_hands.Hands(min_detection_confidence=0.9, min_tracking_confidence=0.9) a
                  try:
                     indexfingermcp_x=int(normalizedLandmark.x*monitorDimensions[0])
                     indexfingermcp_y=int(normalizedLandmark.y*monitorDimensions[1])
-                    new_pos = [int(indexfingertip_x*cursor_speed),int(indexfingertip_y*cursor_speed)]
-                    if abs(new_pos[0]-prev_pos[0])>min_movement[0] and abs(new_pos[1]-prev_pos[1])>min_movement[1]:
-                        win32api.SetCursorPos(new_pos)
-                        prev_pos = new_pos
                  except Exception as e:
                     print(e)
  
@@ -130,42 +126,35 @@ with mp_hands.Hands(min_detection_confidence=0.9, min_tracking_confidence=0.9) a
  
                 #left click
                 try:
-                    Distance_x = indexfingertip_x-thumbfingertip_x
-                    Distance_y = indexfingertip_y-thumbfingertip_y
-                    #print(indexfingertip_x-thumbfingertip_x,indexfingertip_y-thumbfingertip_y)
-                    if abs(Distance_x)<20:
-                        #print(Distance_y)
-                        if abs(Distance_y)<30:
-                            clicks_l+=1
-                            if clicks_l%3 == 0:
-                                mouse.click()                            
-                except:
-                    pass
+                    indexThumbDist = sqrt((indexfingertip_x-thumbfingertip_x)**2+(indexfingertip_y-thumbfingertip_y)**2)
+                    if indexThumbDist<50:
+                        clicks_l+=1
+                        if clicks_l%3 == 0:
+                            mouse.click()                            
+                except Exception as e:
+                    print(e)
+
                 #right click
                 try:
-                    Distance_x = middlefingertip_x-thumbfingertip_x
-                    Distance_y = middlefingertip_y-thumbfingertip_y
-                    #print(indexfingertip_x-thumbfingertip_x,indexfingertip_y-thumbfingertip_y)
-                    if abs(Distance_x)<20:
-                        #print(Distance_y)
-                        if abs(Distance_y)<30:
-                            clicks_r+=1
-                            if clicks_r%3 == 0:
-                                mouse.right_click()                            
+                    middleThumbDist = sqrt((thumbfingertip_x-middlefingertip_x)**2+(thumbfingertip_y-middlefingertip_y)**2)
+                    if middleThumbDist<150:
+                        clicks_r+=1
+                        if clicks_r%3 == 0:
+                            mouse.right_click()
                 except:
                     pass
 
                 #double-click
                 try:
-                    indexMiddleDist = sqrt((indexfingertip_x-middlefingertip_x)**2,(indexfingertip_y-middlefingertip_y)**2)
-                    indexThumbDist = sqrt((indexfingertip_x-thumbfingertip_x)**2,(indexfingertip_y-thumbfingertip_y)**2)
-                    middleThumbDist = sqrt((thumbfingertip_x-middlefingertip_x)**2,(thumbfingertip_y-middlefingertip_y)**2)
+                    indexMiddleDist = sqrt((indexfingertip_x-middlefingertip_x)**2+(indexfingertip_y-middlefingertip_y)**2)
+                    indexThumbDist = sqrt((indexfingertip_x-thumbfingertip_x)**2+(indexfingertip_y-thumbfingertip_y)**2)
+                    middleThumbDist = sqrt((thumbfingertip_x-middlefingertip_x)**2+(thumbfingertip_y-middlefingertip_y)**2)
                     if indexMiddleDist<=10 and middleThumbDist<=10 and indexThumbDist<=10:
                         clicks_dbl+=1
                         if clicks_dbl%3 == 0:
                             mouse.double_click()
-                except:
-                    pass
+                except Exception as e:
+                    print(e)
 
                 #ok
                 try:
@@ -173,8 +162,8 @@ with mp_hands.Hands(min_detection_confidence=0.9, min_tracking_confidence=0.9) a
                     thumbPinkyDist = sqrt((thumbfingertip_x-pinkytip_x)**2 + (thumbfingertip_y-pinkytip_y)**2)
                     indexPipDipDist = sqrt((indexfingerpip_x-indexfingerpip_x)**2 + (indexfingerdip_x-indexfingerdip_y)**2)
                     if (pinkyWristDist<=250 and thumbPinkyDist>=350 and indexPipDipDist>=100):
-                        keyboard.press('enter')
-                        print("Enter")
+                        #keyboard.press('enter')  //fake fires so currently disabled
+                        print("Enter (disabled)")
                 except Exception as e:
                     print(e)
 
@@ -197,6 +186,25 @@ with mp_hands.Hands(min_detection_confidence=0.9, min_tracking_confidence=0.9) a
                         print("locked")
                 except Exception as e:
                     print(e)
+
+                #move cursor
+                try:
+                    new_pos = [int(indexfingertip_x*cursor_speed),int(indexfingertip_y*cursor_speed)]
+                    if abs(new_pos[0]-prev_pos[0])>min_movement[0]*cursor_speed and abs(new_pos[1]-prev_pos[1])>min_movement[1]*cursor_speed and indexThumbDist>80:
+                        mouse.move(new_pos[0],new_pos[1],absolute=True)
+                        prev_pos = new_pos
+                        if new_pos[0]>monitorDimensions[0]:
+                            prev_pos[0] = monitorDimensions[0]
+                        if new_pos[0]<0:
+                            prev_pos[0] = 0
+                        if new_pos[1]>monitorDimensions[1]:
+                            prev_pos[1] = monitorDimensions[1]
+                        if new_pos[1]<0:
+                            prev_pos[1] = 0
+                        prev_pos = new_pos
+                        print(prev_pos)
+                except:
+                    pass
  
         cv2.imshow('Hand Tracking', image)
  
